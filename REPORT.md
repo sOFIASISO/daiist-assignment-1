@@ -99,13 +99,18 @@ extra money they can without it being flagged!
 
 **Features I engineered, and why.**
 
-- `amenity_count`: the number of amenities listed. [Your words: why more
-  amenities might mean a higher price.]
+- `amenity_count`: the number of amenities listed. I included it because a longer
+  list (wifi, kitchen, air conditioning...) suggests a better-equipped flat, which I
+  expected to cost more. Listings had between 3 and 90 amenities, with a typical
+  value around 30.
 - `dist_center_km`: straight-line distance (haversine formula) from the listing's
-  coordinates to Puerta del Sol. [Your words: why location matters for price.]
-- `has_reviews`: 1 if the listing has at least one review. [Your words: it tells
-  the model which review scores were filled in, so a new listing is not read as a
-  bad one.]
+  coordinates to Puerta del Sol. I included it because I expected flats closer to the
+  centre to be more expensive. It was the second strongest link with price in my data
+  (correlation -0.28).
+- `has_reviews`: 1 if the listing has at least one review. I added it because 420
+  listings (about 12%) had no review scores, so I filled those blanks with the training
+  median. This flag tells the model which flats are new, so a new listing is not
+  mistaken for one with an average rating.
 - `bathrooms_num`: described above.
 - `district_*`: the district (`neighbourhood_group_cleansed`) as one yes/no column
   per district, with one district dropped to avoid a redundant column.
@@ -170,7 +175,8 @@ Tuning was kept light
 - Learning rate (PyTorch): 0.05, 0.1 and 0.2. I chose 0.2 by validation MAE, with
   ties broken by the smaller weight gap to scikit-learn. 
 
-
+R^2 = 0.29 is week, but it isn’t a sign thats theres anythign wrong. 
+The strongest single correlation was only 0.34. A linear model can’t get far from those columns. Also, the baseline was beat on the test set (62 vs 71 EUR). I haven’t compared it to other people’s results, so I won’t claim it’s typical, only that it’s explainable.
 
 ## Limitations & next steps
 
@@ -200,9 +206,8 @@ Tuning was kept light
 
 ## Generative AI use disclosure
 
-## Generative AI use disclosure
 
-I used Claude (Anthropic's AI assistant) throughout this assignment.
+I used Claude throughout this assignment.
 
 **Understanding the assignment.** Claude explained the README to me in plain
 language: what each file is, what the task requires, how the grading works,
@@ -232,10 +237,25 @@ fork, and removing the duplicated nested folder and the extra `train.py` and
    model score, so that I would not be choosing a split that flatters my
    results. I ran the comparison and picked seed 4, which had the smallest
    gap to 70/15/15 (0.015).
+3. Claude helped with with suggesting a list of candidates columns to remove, 
+    although i followed my own croteria it was useful to see what the AI thought
+4. Claude helped me with calulcating the distance to sol formulas (for my app: 
+    the feature distance to center)
+5. Claude especially helped me with health checks, for example when creating the app,
+   it added a small check after each step so I could see that the step worked before
+   moving on: the number of districts and the one district dropped in training
+   (21 districts, Arganzuela), a test that the chart functions return charts, and a
+   made-up flat in Centro whose three model predictions and warning threshold I could
+   verify by hand (224 EUR typical price, so the 50% warning starts at 336 EUR). The same
+   happened when saving the models: the check lines showed that models loaded from disk
+   give exactly the same predictions as the ones in memory. I then ran the app through
+   `main.py app` and confirmed it showed the same results table as training
+   (test MAE 62.09).
+
 
 **Code.** Claude helped me with the last steps especially, the tuning loops,
 and the saving of the models, and I ran it and read
-its output. I added the notes in the notebook.
+its output. 
 
 **Decisions that were mine.** The main coding and intreprettaion. The dataset, the business idea (a pricing tool
 for hosts), the scope (2-bedroom entire homes), the price cap of 500, the rule
